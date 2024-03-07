@@ -1,0 +1,65 @@
+﻿@page "/habitaciones"
+
+@using System.Threading.Tasks
+@using AppWebHotel.Services
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+
+@inject HabitacionService _habitacionService
+
+<h2>Habitaciones</h2>
+<MudButton Variant="Variant.Filled" Color="Color.Error">Nueva habitacion</MudButton>
+
+@if (habitaciones == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Numero de la Habitacion</th>
+                <th>Numero del Piso</th>
+                <th>Tipo de Habitacion</th>
+                <th>Acciones</th> <!-- Columna para los botones -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var habitacion in habitaciones)
+            {
+                <tr>
+                    <td>@habitacion.NumeroHabitacion</td>
+                    <td>@habitacion.NumeroPiso</td>
+                    <td>@habitacion.TipoHabitacion</td>
+                    <td>
+                        <button @onclick="() => ModificarHabitacion(habitacion)">Modificar</button>
+                        <button @onclick="() => EliminarHabitacion(habitacion)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Habitacion[] habitaciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        habitaciones = await _habitacionService.GetHabitaciones();
+    }
+    // Evento de modificación de habitación
+    private void ModificarHabitacion(Habitacion habitacion)
+    {
+        // Aquí puedes implementar la lógica para modificar la habitación
+        // Puedes mostrar un formulario de modificación o realizar una operación directamente
+    }
+
+    // Evento de eliminación de habitación
+    private void EliminarHabitacion(Habitacion habitacion)
+    {
+        // Aquí puedes implementar la lógica para eliminar la habitación
+        // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+    }
+}

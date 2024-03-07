@@ -1,0 +1,133 @@
+﻿@using AppWebHotel.Helpers
+@using AppWebHotel.Services
+@using AppWebHotel.Views.DialogMessage
+@using WebAppHotel.Models
+@inject NavigationManager _navigationManager
+@inject UsuarioService _usuarioService
+@inject IDialogService DialogService
+
+
+<MudDialog>
+    <DialogContent>
+        <div class="container-div">
+
+            <center>
+                <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Size="Size.Large" Style="width:100px; height:100px; margin:20px" />
+            </center>
+            <EditForm Model="@usuarioLogin" OnValidSubmit="OnValidSubmit">
+
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+
+                <MudText Typo="Typo.h4" GutterBottom="true" Align="Align.Center">Bienvenido</MudText>
+
+
+                <MudTextField T="string"
+                              @bind-Value="@usuarioLogin.NombreUsuario"
+                              Label="Nombre de usuario"
+                              Variant="Variant.Outlined"
+                              Class="my-6"
+                              For="@(() => usuarioLogin.Password)">
+                </MudTextField>
+
+                <MudTextField @bind-Value="@usuarioLogin.Password"
+                              Label="Contraseña"
+                              Variant="Variant.Outlined"
+                              InputType="@PasswordInput"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@PasswordInputIcon"
+                              OnAdornmentClick="TogglePasswordVisibility"
+                              For="@(() => usuarioLogin.Password)" />
+
+                <MudButton Class="mt-5" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Size="Size.Large"
+                           FullWidth="true"
+                           Disabled="@disableButton">Iniciar Sesión</MudButton>
+
+                <MudButton Class="mt-5" OnClick="Cerrar" Variant="Variant.Filled" Color="Color.Error" ButtonType="ButtonType.Button" Size="Size.Large"
+                           FullWidth="true"
+                           Disabled="@disableButton">Salir</MudButton>
+
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(myImageClass + " my-7")" />
+            </EditForm>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+<style>
+    .container-div {
+        display: block;
+        justify-content: center; /* Centra horizontalmente los elementos dentro del contenedor */
+        align-items: center; /* Centra verticalmente los elementos dentro del contenedor */
+        height: 28vw;
+        width: 35vh;
+    }
+
+    .inline-content {
+        display: inline-flex;
+        justify-content: space-between; /* Distribuye los elementos uniformemente a lo largo del contenedor */
+        align-items: center; /* Centra verticalmente los elementos dentro del contenedor */
+    }
+
+</style>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string CodigoReserva { get; set; }
+
+    Usuario usuarioLogin = new Usuario();
+    void Cerrar() => MudDialog.Close(DialogResult.Ok(true));
+
+    string myImageClass { get; set; } = "d-none";
+    string myAlert { get; set; } = "d-none";
+    bool disableButton { get; set; } = false;
+
+    bool PasswordVisibility;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void TogglePasswordVisibility()
+    {
+        @if (PasswordVisibility)
+        {
+            PasswordVisibility = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            PasswordVisibility = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(usuarioLogin.NombreUsuario) || string.IsNullOrWhiteSpace(usuarioLogin.Password))
+        {
+            var parameters = new DialogParameters{{"Message", "Por favor, asegúrate de completar los campos de Usuario y Contraseña antes de continuar."}
+        };
+            DialogService.Show<MensajeDialogPage>("Aviso", parameters);
+            return;
+        }
+
+        myImageClass = "d-block";
+        disableButton = true;
+        var result = await _usuarioService.IniciarSesion(usuarioLogin.NombreUsuario, usuarioLogin.Password);
+
+        if (result != null)
+        {
+            Globales.Usuario = result;
+            _navigationManager.NavigateTo("Page/home");
+        }
+        else
+        {
+            myImageClass = "d-none";
+            disableButton = false;
+            myAlert = "d-block";
+            var p = new DialogParameters { { "Message", "El nombre de usuario o la contraseña no son válidos. Por favor, inténtalo de nuevo." } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+        }
+    }
+
+
+}

@@ -1,0 +1,110 @@
+﻿@using WebAppHotel.Models
+@using WebAppHotel.Services
+@inject IDialogService DialogService
+@inject ReservacionService _reservacionService
+
+<MudDialog>
+    <DialogContent>
+        <div class="container-div2">
+            @if (Habitacion != null)
+            {
+                <h6>Detalles de la habitación</h6>
+                <MudDivider Style="margin-top:5px" Vertical="true" FlexItem="true" />
+
+                <MudText Typo="Typo.body1">Número: @Habitacion.NumeroHabitacion</MudText>
+                <MudText Typo="Typo.body1">Piso: @Habitacion.NumeroPiso</MudText>
+                <MudText Typo="Typo.body1">Tipo: @Habitacion.TipoHabitacion</MudText>
+
+                <MudText Typo="Typo.body1">Fecha Entrada: @FechaEntrada.ToString("dd/MM/yyyy")</MudText>
+                <MudText Typo="Typo.body1">Fecha Salida: @FechaSalida.ToString("dd/MM/yyyy")</MudText>
+
+                <MudText Typo="Typo.body1">Cantidad Dias: @FechaSalida.Subtract(FechaEntrada).Days</MudText>
+
+                <MudDivider Style="margin-top:5px" Vertical="true" FlexItem="true" />
+                <br />
+                <MudTextField @bind-Value="NombreHuesped" Label="Nombre del huésped" />
+                <!--   -->
+                <br />
+                <br />
+                <MudDivider Style="margin-top:5px; margin-bottom:10px" Vertical="true" FlexItem="true" />
+
+                <!-- Botones de "Reservar" y "Salir" -->
+                <div class="buttons-container">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>ReservarHabitacion())">Reservar</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@Cancelar">Salir</MudButton>
+                </div>
+            }
+        </div>
+    </DialogContent>
+</MudDialog>
+<!--ESTO DESPUES CAMBIARLO A UN ARCHIVO CSS-->
+<style>
+
+    .container-div2 {
+        display: block;
+        height: 20vw;
+        width: 30vh;
+    }
+
+</style>
+@code
+{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Habitacion Habitacion { get; set; }
+    [Parameter] public DateTime FechaEntrada { get; set; }
+    [Parameter] public DateTime FechaSalida { get; set; }
+
+    private string NombreHuesped { get; set; }
+
+    // Método para reservar la habitación
+    private async Task ReservarHabitacion()
+    {
+        //aqui validar los datos esten bien
+        if (string.IsNullOrWhiteSpace(NombreHuesped))
+        {
+            return;
+        }
+        // Aquí implementar la lógica para reservar la habitación
+        Reserva reserva = new Reserva
+            {
+                CodigoReserva = "",
+                IdReserva = 0,
+                NombreCliente = NombreHuesped,
+                IdHabitacion = Habitacion.IdHabitacion,
+                FechaEntrada = FechaEntrada,
+                FechaSalida = FechaSalida,
+                EstadoReservacion = true
+            };
+
+        var reponse = await _reservacionService.CrearReservacionAsync(reserva);
+        //Mostrar el cosigo de la reserva
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Small,
+                CloseOnEscapeKey = false,
+                FullWidth = false,
+                FullScreen = false
+            };
+        var parameters = new DialogParameters();
+        parameters.Add("CodigoReserva", reponse);
+
+        var dialog = await DialogService.ShowAsync<CodigoReservaPage>("Codigo de reserva", parameters, options);
+        //cerrar la vista
+        var dialogResult = await dialog.Result;
+
+        // Verificar si el diálogo se cerró correctamente
+        if (!dialogResult.Cancelled)
+        {
+            // El diálogo se cerró sin cancelación, así que ejecutar Cancelar
+            await Cancelar();
+        }
+    }
+
+    // Método para cancelar la reserva y cerrar el diálogo
+    private async Task Cancelar()
+    {
+        // Aquí implementar la lógica para cancelar la reserva
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

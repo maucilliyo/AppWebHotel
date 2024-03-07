@@ -1,0 +1,147 @@
+﻿@using AppWebHotel.Services
+@using AppWebHotel.Views.DialogMessage
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+
+@inject ReservacionService _reservacionService
+@inject HabitacionService _habitacionService
+@inject IDialogService DialogService
+@inject FacturaService _facturaService
+
+<MudDialog>
+    <DialogContent>
+        <div class="container-div">
+            <MudText Color="Color.Error" Typo="Typo.h5">Consultar Reservacion</MudText>
+
+            <MudDivider Style="margin-top:5px; margin-bottom:10px" Vertical="true" FlexItem="true" />
+
+            <div class="inline-content">
+                <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="CodigoReserva" Label="Digite su codigo" />
+                <MudButton Class="btn-buscar" Color="Color.Primary" Variant="Variant.Outlined" OnClick="BuscarReserva">Buscar</MudButton>
+            </div>
+
+
+            @if (reserva.Habitacion != null)
+            {
+                <br />
+                <MudText Color="Color.Success" Typo="Typo.h5">Datos de la reserva</MudText>
+                <MudText Typo="Typo.body1">Nombre: @reserva.NombreCliente</MudText>
+                <MudText Typo="Typo.body1">Número: @reserva.Habitacion.NumeroHabitacion</MudText>
+                <MudText Typo="Typo.body1">Piso: @reserva.Habitacion.NumeroPiso</MudText>
+                <MudText Typo="Typo.body1">Tipo: @reserva.Habitacion.TipoHabitacion</MudText>
+
+                <MudText Typo="Typo.body1">Fecha entrada: @reserva.FechaEntrada.ToString("dd/MM/yyyy")</MudText>
+                <MudText Typo="Typo.body1">Fecha salida: @reserva.FechaSalida.ToString("dd/MM/yyyy")</MudText>
+                <MudText Typo="Typo.body1">Cantidad Dias: @reserva.FechaSalida.Subtract(reserva.FechaEntrada).Days</MudText>
+
+                <MudText Typo="Typo.body1">Estado: @(reserva.EstadoReservacion ? "Activo" : "Cancelada")</MudText>
+
+            }
+
+        </div>
+        <MudDivider Style="margin-top:5px; margin-bottom:10px" Vertical="true" FlexItem="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Warning" Variant="Variant.Outlined" OnClick="CancelarReservacion">Cancelar Reservacion</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="Submit">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+<!--ESTO DESPUES CAMBIARLO A UN ARCHIVO CSS-->
+<style>
+    .container-div {
+        display: block;
+        height: 20vw;
+        width: 30vh;
+    }
+
+    .inline-content {
+        display: inline-flex;
+        justify-content: space-between; /* Distribuye los elementos uniformemente a lo largo del contenedor */
+        align-items: center; /* Centra verticalmente los elementos dentro del contenedor */
+    }
+
+    .btn-buscar {
+        margin-left: 10px;
+    }
+</style>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    Reserva reserva = new Reserva();
+
+    private string CodigoReserva { get; set; }
+
+    private async Task BuscarReserva()
+    {
+        reserva = new Reserva();
+        var reposeReserva = await _reservacionService.GetReservacionByCodigoAsync(CodigoReserva);
+
+
+        if (reposeReserva != null)
+        {
+            reposeReserva.Habitacion = await _habitacionService.GetHabitacionesById(reposeReserva.IdHabitacion);
+            reserva = reposeReserva;
+        }
+
+        StateHasChanged(); // Forzar actualización de la interfaz
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task CancelarReservacion()
+    {
+        //validaciones
+        if (reserva.CodigoReserva == null)
+        {
+            var p = new DialogParameters { { "Message", "No hay reserva para cancelar" } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+            return;
+            
+        }
+        if (!reserva.EstadoReservacion)
+        {
+
+            // En algún método donde desees mostrar el diálogo:
+            var p = new DialogParameters { { "Message", "La reservacion ya fue cancelada anteriormente" } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+            return;
+        }
+        //
+
+        reserva.EstadoReservacion = false;
+        var response = _reservacionService.ModificarReservacionAsync(reserva);
+
+
+        //revisar si esta seca del dia de entrada para generar un cobro
+        string mensaje = "La reserva se cancelo con exito";
+
+        if (reserva.FechaEntrada.Subtract(DateTime.Now).Days <= 1)
+        {
+            mensaje += ", pero tu reserva estaba próxima a la fecha de entrada. por este motivo hay un cargo que debes cancelar";
+            //Generar el cobro
+            Factura factura = new()
+                {
+                    CantidadPersonas = 0,
+                    CodigoReserva = reserva.CodigoReserva,
+                    Detalle = "Cobro por cancelacion muy anticipada a la fecha de entrada",
+                    FechaFactura = DateTime.Now,
+                    IdReserva = reserva.IdReserva,
+                    PrecioTotal = 10000
+                };
+            await _facturaService.CrearFacturaAsync(factura);
+        }
+
+        // En algún método donde desees mostrar el diálogo:
+        var parameters = new DialogParameters
+        {
+            {
+                "Message", mensaje
+            }
+        };
+
+        DialogService.Show<MensajeDialogPage>("Aviso", parameters);
+
+    }
+    void Cancel() => MudDialog.Cancel();
+}

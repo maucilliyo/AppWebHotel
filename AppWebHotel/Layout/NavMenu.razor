@@ -1,0 +1,16 @@
+﻿@using AppWebHotel.Helpers
+
+@if (Globales.Usuario.IdRol == 1)
+{
+    <MudNavLink Href="habitaciones" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Room">Habitaciones</MudNavLink>
+    <MudNavLink Href="reservaciones" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ReceiptLong">Reservas</MudNavLink>
+    <MudNavLink Href="facturas" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PriceCheck">Facturas</MudNavLink>
+    <MudNavLink Href="usuarios" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person2">Usuarios</MudNavLink>
+    <MudNavLink Href="ventas" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PlaylistAddCheckCircle">Historial Ventas</MudNavLink>
+    <MudNavLink Href="bitacora" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth">Bitacora acciones</MudNavLink>
+}
+else
+{
+    <MudNavLink Href="ventas" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PriceCheck">Facturas</MudNavLink>
+    <MudNavLink Href="reservaciones" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ReceiptLong">Reservas</MudNavLink>
+}

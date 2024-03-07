@@ -1,0 +1,126 @@
+﻿@using AppWebHotel.Services
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+@inject HabitacionService _habitacionServise
+@inject IDialogService Dialog
+
+<MudDialog>
+
+    <DialogContent>
+
+        ENCUENTRA TU HABITACIÓN PERFECTA: SELECCIONA TUS FECHAS Y HAZ CLIC EN BUSCAR
+
+        <div class="container">
+            <div class="inline-content">
+                <MudDatePicker Class="datePicker" Label="Fecha de entrada" @bind-Date="fechaEntrada" />
+                <MudDatePicker Class="datePicker" Label="Fecha de Salida" @bind-Date="fechaSalida" />
+
+                <MudButton OnClick="VerHabitacionLires" Class="btn-buscar" Variant="Variant.Filled" Color="Color.Primary">Buscar</MudButton>
+            </div>
+            <MudDivider Style="margin-top:20px" Vertical="true" FlexItem="true" />
+
+            <div class="container-card">
+                @foreach (var habitacion in habitaciones)
+                {
+                    <MudCard Class="card">
+                        <MudCardMedia Image="img/habitacion.jpg" Height="100" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">Habitacion # @habitacion.NumeroHabitacion</MudText>
+                            <MudText Typo="Typo.body1">Piso @habitacion.NumeroPiso.</MudText>
+                            <MudText Typo="Typo.body1">Tipo @habitacion.TipoHabitacion.</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton OnClick="(()=>Reservar(habitacion))" Variant="Variant.Text" Color="Color.Info">RESERVAR</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                }
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Cancel">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+<!--ESTO DESPUES CAMBIARLO A UN ARCHIVO CSS-->
+<style>
+    .inline-content {
+        display: inline-flex;
+        justify-content: space-between; /* Distribuye los elementos uniformemente a lo largo del contenedor */
+        align-items: center; /* Centra verticalmente los elementos dentro del contenedor */
+    }
+
+    .container {
+        display: block;
+        height: 35vw;
+    }
+
+    .container-card {
+        display: flex;
+        justify-content: flex-start; /* Ajusta el espacio entre las tarjetas */
+    }
+
+    .datePicker {
+        width: 150px;
+        margin-left: 20px;
+    }
+
+    .btn-buscar {
+        margin-top: 10px;
+        margin-left: 30px;
+    }
+
+    .card {
+        width: 200px; /* Ancho de cada tarjeta */
+        border: 1px solid #ccc; /* Borde de la tarjeta */
+        border-radius: 5px; /* Radio de borde para redondear esquinas */
+        padding: 5px; /* Espacio interno de la tarjeta */
+        margin: 5px; /* Margen entre las tarjetas */
+    }
+</style>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private DateTime? fechaEntrada = DateTime.Now.AddDays(1);
+    private DateTime? fechaSalida = DateTime.Now.AddDays(2);
+
+    List<Habitacion> habitaciones = new List<Habitacion>();
+
+    private async void VerHabitacionLires()
+    {
+        // Convertir los datos de los MudDatePicker a DateTime
+        DateTime fechaInicio = fechaEntrada.Value;
+        DateTime fechaFin = fechaSalida.Value;
+
+        // Obtener las habitaciones libres y convertirlas en una lista
+        var habitacionesArray = await _habitacionServise.GetHabitacionesLibres(fechaInicio, fechaFin);
+
+        habitaciones = habitacionesArray.ToList();
+        StateHasChanged(); // Forzar actualización de la interfaz
+    }
+
+    private async void Reservar(Habitacion habitacion)
+    {
+        // Define las opciones del diálogo
+
+
+        // Abre el diálogo y pasa la habitación como parámetro
+        var parameters = new DialogParameters();
+        parameters.Add("Habitacion", habitacion);
+        parameters.Add("FechaEntrada", fechaEntrada.Value);
+        parameters.Add("FechaSalida", fechaSalida.Value);
+
+        var dialog = await Dialog.ShowAsync<NuevaReservaPage>("RESERVACIÓN", parameters);
+
+        // Espera a que el diálogo se cierre antes de actualizar la lista de habitaciones
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            // La reserva se completó, puedes actualizar la lista de habitaciones aquí
+            VerHabitacionLires();
+        }
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

@@ -1,0 +1,85 @@
+﻿@using WebAppHotel.Models
+@using WebAppHotel.Services
+@inject IDialogService DialogService
+@inject ReservacionService _reservacionService
+@inject FacturaService _facturaService
+
+<MudDialog>
+    <DialogContent>
+        <div class="container-div2">
+            <MudForm @ref="_form" Model="_factura" OnValidSubmit="HandleValidSubmit">
+                <br />
+                <MudText Color="Color.Success" Typo="Typo.h4">Modulo de facturacion</MudText>
+
+                <MudDivider Style="margin-top:10px; margin-bottom:10px" Vertical="true" FlexItem="true" />
+
+                <MudText Color="Color.Info" Typo="Typo.h6">Datos de la reserva</MudText>
+
+                <MudText Typo="Typo.body1">Codigo de reservacion: @reserva.CodigoReserva</MudText>
+                <MudText Typo="Typo.body1">Nombre: @reserva.NombreCliente</MudText>
+                <MudText Typo="Typo.body1">Número de habitacion: @reserva.Habitacion.NumeroHabitacion</MudText>
+                <MudText Typo="Typo.body1">Piso: @reserva.Habitacion.NumeroPiso</MudText>
+                <MudText Typo="Typo.body1">Tipo de habitacion: @reserva.Habitacion.TipoHabitacion</MudText>
+
+                <MudText Typo="Typo.body1">Fecha entrada: @reserva.FechaEntrada.ToString("dd/MM/yyyy")</MudText>
+                <MudText Typo="Typo.body1">Fecha salida: @reserva.FechaSalida.ToString("dd/MM/yyyy")</MudText>
+                <MudText Typo="Typo.body1">Cantidad Dias: @reserva.FechaSalida.Subtract(reserva.FechaEntrada).Days</MudText>
+
+                <MudText Typo="Typo.body1">Estado de la reservacion: @(reserva.EstadoReservacion ? "Activo" : "Cancelada")</MudText>
+
+                <MudDivider Style="margin-top:10px; margin-bottom:20px" Vertical="true" FlexItem="true" />
+
+                <MudTextField Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Detalle" @bind-Value="_factura.Detalle" Required="true" />
+                <MudTextField Format="N2" Style="width:150px" Margin="Margin.Dense" Label="Precio Total" @bind-Value="_factura.PrecioTotal" Required="true" />
+
+                <MudDivider Style="margin-top:20px; margin-bottom:20px" Vertical="true" FlexItem="true" />
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Facturar">Facturar</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Cancelar">Cancelar</MudButton>
+            </MudForm>
+        </div>
+    </DialogContent>
+</MudDialog>
+<style>
+    .container-div {
+        display: block;
+        height: 30vw;
+        width: 35vh;
+    }
+
+</style>
+
+@code {
+
+    [Parameter] public Reserva reserva { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private Factura _factura = new Factura();
+    private MudForm _form;
+
+    protected override async Task OnInitializedAsync()
+    {
+        int CantidaDias = reserva.FechaSalida.Subtract(reserva.FechaEntrada).Days;
+        _factura.PrecioTotal = CantidaDias * 25000;
+        _factura.Detalle = "Cancelación de estadía por la cantidad en días de " + CantidaDias + " a ¢25.000 por día";
+    }
+
+    private async void Facturar()
+    {
+        //validaciones
+
+        //
+        _factura.CantidadPersonas = 1;
+        _factura.CodigoReserva = reserva.CodigoReserva;
+        _factura.IdReserva = reserva.IdReserva;
+        _factura.FechaFactura = DateTime.Now;
+        //generar la factura
+        await _facturaService.CrearFacturaAsync(_factura);
+        //actualizar la reservacion
+        reserva.EstadoReservacion = false;
+        await _reservacionService.ModificarReservacionAsync(reserva);
+        //mesaje 
+        MudDialog.Cancel();
+    }
+    void Cancelar() => MudDialog.Cancel();
+}

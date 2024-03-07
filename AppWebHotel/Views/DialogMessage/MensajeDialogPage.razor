@@ -1,0 +1,19 @@
+﻿<MudDialog>
+    <DialogContent>
+        <p>@Message</p>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string Message { get; set; }
+
+    private void CloseDialog()
+    {
+        // Lógica para cerrar el diálogo
+        MudDialog.Cancel();
+    }
+}

@@ -1,0 +1,111 @@
+﻿@page "/reservaciones"
+@using AppWebHotel.Pages.DialogComponents
+@using AppWebHotel.Views
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+
+@inject IDialogService DialogService
+@inject ReservacionService _reservaService
+
+<h2>Reservaciones</h2>
+<MudButton OnClick="NuevaReserva" Variant="Variant.Filled" Color="Color.Error">Nueva reserva</MudButton>
+
+@if (reservaciones == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Codigo de reserva</th>
+                <th>A nombre de</th>
+                <th>Estado de la reservacion</th>
+                <th>Numero de Habitacion</th>
+                <th>Numero de piso</th>
+                <th>Tipo habitacion</th>
+                <th>Acciones</th> <!-- Columna para los botones -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reserva in reservaciones)
+            {
+                <tr>
+                    <td>@reserva.CodigoReserva</td>
+                    <td>@reserva.NombreCliente</td>
+                    <td>@(reserva.EstadoReservacion ? "Activo" : "Cancelada")</td>
+                    <td>@reserva.Habitacion.NumeroHabitacion</td>
+                    <td>@reserva.Habitacion.NumeroPiso</td>
+                    <td>@reserva.Habitacion.TipoHabitacion</td>
+                    <td>
+
+                        @if (reserva.EstadoReservacion)
+                        {
+                            <button @onclick="() => EliminarHabitacion(reserva)">Eliminar</button>
+                            <button @onclick="() => ModificarHabitacion(reserva)">Modificar</button>
+                            <button @onclick="() => Facturar(reserva)">Facturar</button>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Reserva> reservaciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservaciones = await _reservaService.GetReservacionesAsync();
+    }
+    // Evento de modificación de habitación
+    private void ModificarHabitacion(Reserva reserva)
+    {
+        // Aquí puedes implementar la lógica para modificar la habitación
+        // Puedes mostrar un formulario de modificación o realizar una operación directamente
+    }
+    // Evento de eliminación de habitación
+    private void EliminarHabitacion(Reserva reserva)
+    {
+        // Aquí puedes implementar la lógica para eliminar la habitación
+        // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+    }
+    private async void Facturar(Reserva reserva)
+    {
+        // Aquí puedes implementar la lógica para eliminar la habitación
+        // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Small
+                ,
+                FullWidth = false,
+                NoHeader = true,
+            };
+
+        var parameters = new DialogParameters();
+        parameters.Add("reserva", reserva);
+
+        var dialog = await DialogService.ShowAsync<DialogNuevaFactura>("Custom Options Dialog", parameters,options);
+
+        var result = await dialog.Result;
+
+        if (result.Cancelled)
+        {
+            StateHasChanged(); // Forzar actualización de la interfaz
+        }
+
+    }
+    private async Task NuevaReserva()
+    {
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true,
+                NoHeader = true,
+            };
+        DialogService.Show<ReservaPage>("Custom Options Dialog", options);
+    }
+}

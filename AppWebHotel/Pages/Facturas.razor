@@ -1,0 +1,49 @@
+﻿@page "/facturas"
+
+
+@using System.Threading.Tasks
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+@inject FacturaService FacturaService
+
+<h1>Lista de Facturas</h1>
+
+@if (facturas == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Código de Reserva</th>
+                <th>Cantidad de Personas</th>
+                <th>Precio Total</th>
+                <th>Fecha de Factura</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.CodigoReserva</td>
+                    <td>@factura.CantidadPersonas</td>
+                    <td>@factura.PrecioTotal</td>
+                    <td>@factura.FechaFactura</td>
+                    <td>@factura.Detalle</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Factura[] facturas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        facturas = await FacturaService.GetFacturasAsync();
+    }
+}

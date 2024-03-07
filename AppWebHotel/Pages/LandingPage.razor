@@ -1,0 +1,167 @@
+﻿@page "/"
+@layout LandingLayout
+
+@using AppWebHotel.Views
+
+@inject IDialogService Dialog
+
+
+<!-- Bootstrap Core CSS -->
+ 
+
+<!-- Custom CSS -->
+<link href="css/landing-page.css" rel="stylesheet">
+
+
+<div class="intro-header">
+    <div class="container">
+        <div class="col-lg-12">
+            <div class="intro-message">
+                <h1>Hotel Patito feliz</h1>
+                <h3>Disfruta en el regazo de la naturaleza.</h3>
+                <hr class="intro-divider">
+                <ul class="inline-buttons">
+                    <li>
+                        <MudButton Class="btn btn-default btn-lg network-name" @onclick="OpenDialog" Variant="Variant.Filled">
+                            RESERVAR AHORA
+                        </MudButton>
+                    </li>
+                    <li>
+                        <MudButton Class="btn btn-default btn-lg network-name" @onclick="OpenDialogVerReserva" Variant="Variant.Filled">
+                            VER RESERVACION
+                        </MudButton>
+                    </li>
+                    <li>
+                        <MudButton Class="btn btn-default btn-lg network-name" @onclick="Openloging" Variant="Variant.Filled">
+                            INICIAR SESION
+                        </MudButton>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+
+</div>
+
+<div class="content-section-a">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 col-sm-6">
+                <hr class="section-heading-spacer">
+                <div class="clearfix"></div>
+                <h2 class="section-heading">Suite King de Lujo con Vista Panorámica</h2>
+                <p class="lead">
+                    ¡Disfruta de una estancia de lujo en nuestra espaciosa Suite King con impresionantes vistas panorámicas!
+                    Esta elegante habitación es perfecta para parejas o viajeros que buscan comodidad y estilo durante su visita a nuestra ciudad..
+                </p>
+            </div>
+            <div class="col-lg-5 col-lg-offset-2 col-sm-6">
+                <img class="img-responsive" src="img/room.jpg" alt="">
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+</div>
+<!-- /.content-section-a -->
+
+<div class="content-section-b">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
+                <hr class="section-heading-spacer">
+                <div class="clearfix"></div>
+                <h2 class="section-heading">Piscina con Espectacular Vista al Mar</h2>
+                <p class="lead">
+                    Sumérgete en la serenidad y el lujo en nuestra impresionante piscina con vistas panorámicas al mar.
+                    nuestra piscina ofrece una experiencia única que combina relajación y belleza natural.
+                </p>
+            </div>
+            <div class="col-lg-5 col-sm-pull-6  col-sm-6">
+                <img class="img-responsive" src="img/picina.jpg" alt="">
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+</div>
+<!-- /.content-section-b -->
+
+<div class="content-section-a">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-5 col-sm-6">
+                <hr class="section-heading-spacer">
+                <div class="clearfix"></div>
+                <h2 class="section-heading">Reserva Ahora y Crea Recuerdos Inolvidables con Tu Familia</h2>
+                <p class="lead">
+                    ¡No esperes más para planificar unas vacaciones familiares que todos recordarán con cariño durante años!
+                    Reserva tu estancia en nuestro hotel y déjanos encargarnos de cada detalle para que tú y tu familia puedan disfrutar al máximo.
+                </p>
+            </div>
+            <div class="col-lg-5 col-lg-offset-2 col-sm-6">
+                <img class="img-responsive" src="img/diario.jpg" alt="">
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+</div>
+
+<div class="banner">
+    <div class="container">
+        <h2>Integrantes del Grupo:</h2>
+        <h4>MAURICIO ARIAS</h4>
+        <h4>KATERIN PEREZ</h4>
+        <h4>VERONICA FERNANDEZ</h4>
+        <h4>EDGAR SERRANO</h4>
+        <h4>EVELYN ESQUIVEL</h4>
+    </div>
+</div>
+
+ 
+@code
+{
+    private void OpenDialog()
+    {
+
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Large,
+                FullWidth = false,
+                NoHeader = true,
+            };
+        Dialog.Show<ReservaPage>("Custom Options Dialog", options);
+    }
+    private void Openloging()
+    {
+
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Large,
+                FullWidth = false,
+                NoHeader = true,
+            };
+        Dialog.Show<LoginPage>("Custom Options Dialog", options);
+    }
+    private void OpenDialogVerReserva()
+    {
+
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Small,
+                FullWidth = false,
+                NoHeader = true,
+            };
+        Dialog.Show<VerReservacionPage>("Custom Options Dialog", options);
+    }
+}
