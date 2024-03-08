@@ -1,14 +1,16 @@
 ﻿@page "/habitaciones"
 
 @using System.Threading.Tasks
+@using AppWebHotel.Pages.DialogComponents
 @using AppWebHotel.Services
 @using WebAppHotel.Models
 @using WebAppHotel.Services
 
 @inject HabitacionService _habitacionService
+@inject IDialogService DialogService
 
 <h2>Habitaciones</h2>
-<MudButton Variant="Variant.Filled" Color="Color.Error">Nueva habitacion</MudButton>
+<MudButton OnClick="NuevaHabitacion" Variant="Variant.Filled" Color="Color.Error">Nueva habitacion</MudButton>
 
 @if (habitaciones == null)
 {
@@ -61,5 +63,27 @@ else
     {
         // Aquí puedes implementar la lógica para eliminar la habitación
         // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+    }
+    private async void NuevaHabitacion()
+    {
+        
+        //Mostrar el cosigo de la reserva
+        DialogOptions options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Small,
+                CloseOnEscapeKey = false,
+                FullWidth = false,
+                FullScreen = false
+            };
+
+        var dialog = await DialogService.ShowAsync<DialogNuevaHabitacion>("", options);
+        //cerrar la vista
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            habitaciones = await _habitacionService.GetHabitaciones();
+            StateHasChanged(); // Forzar actualización de la interfaz
+        }
     }
 }

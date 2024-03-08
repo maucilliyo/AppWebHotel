@@ -1,6 +1,11 @@
 ﻿@using AppWebHotel.Helpers
+@inject NavigationManager _navigationManager
 
-@if (Globales.Usuario.IdRol == 1)
+@if (Globales.Usuario == null)
+{
+    _navigationManager.NavigateTo("/");
+}
+else if (Globales.Usuario.IdRol == 1)
 {
     <MudNavLink Href="habitaciones" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Room">Habitaciones</MudNavLink>
     <MudNavLink Href="reservaciones" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ReceiptLong">Reservas</MudNavLink>

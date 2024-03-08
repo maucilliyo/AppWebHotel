@@ -6,7 +6,7 @@
 
 <MudDialog>
 
-    <DialogContent>
+    <DialogContent >
 
         ENCUENTRA TU HABITACIÓN PERFECTA: SELECCIONA TUS FECHAS Y HAZ CLIC EN BUSCAR
 
@@ -56,7 +56,10 @@
 
     .container-card {
         display: flex;
+        flex-wrap: wrap;
         justify-content: flex-start; /* Ajusta el espacio entre las tarjetas */
+        overflow-y: auto;
+        max-height: calc(80vh - 200px); /* Ajusta el valor según sea necesario */
     }
 
     .datePicker {
@@ -79,6 +82,7 @@
 </style>
 
 @code {
+
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     private DateTime? fechaEntrada = DateTime.Now.AddDays(1);

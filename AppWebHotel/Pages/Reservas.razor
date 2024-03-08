@@ -64,23 +64,24 @@ else
     // Evento de modificación de habitación
     private void ModificarHabitacion(Reserva reserva)
     {
-        // Aquí puedes implementar la lógica para modificar la habitación
-        // Puedes mostrar un formulario de modificación o realizar una operación directamente
+        // Aquí implementar la lógica para modificar la habitación
+        // mostrar un formulario de modificación o realizar una operación directamente
     }
     // Evento de eliminación de habitación
     private void EliminarHabitacion(Reserva reserva)
     {
-        // Aquí puedes implementar la lógica para eliminar la habitación
-        // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+        // Aquí  implementar la lógica para eliminar la habitación
+        // mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
     }
+
     private async void Facturar(Reserva reserva)
     {
-        // Aquí puedes implementar la lógica para eliminar la habitación
-        // Puedes mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
+        // Aquí implementar la lógica para eliminar la habitación
+        // mostrar un mensaje de confirmación antes de eliminar o realizar la operación directamente
         DialogOptions options = new DialogOptions
             {
                 MaxWidth = MaxWidth.Small
-                ,
+                    ,
                 FullWidth = false,
                 NoHeader = true,
             };
@@ -88,7 +89,7 @@ else
         var parameters = new DialogParameters();
         parameters.Add("reserva", reserva);
 
-        var dialog = await DialogService.ShowAsync<DialogNuevaFactura>("Custom Options Dialog", parameters,options);
+        var dialog = await DialogService.ShowAsync<DialogNuevaFactura>("Custom Options Dialog", parameters, options);
 
         var result = await dialog.Result;
 
@@ -98,6 +99,7 @@ else
         }
 
     }
+
     private async Task NuevaReserva()
     {
         DialogOptions options = new DialogOptions
@@ -106,6 +108,14 @@ else
                 FullWidth = true,
                 NoHeader = true,
             };
-        DialogService.Show<ReservaPage>("Custom Options Dialog", options);
+        var dialog = await DialogService.ShowAsync<ReservaPage>("Custom Options Dialog", options);
+
+        var result = await dialog.Result;
+
+        if (result.Cancelled)
+        {
+            await OnInitializedAsync(); 
+            StateHasChanged(); // Forzar actualización de la interfaz
+        }
     }
 }

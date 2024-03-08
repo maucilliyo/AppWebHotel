@@ -1,0 +1,37 @@
+﻿@using AppWebHotel.Helpers
+@inject NavigationManager _navigationManager
+
+<MudDialog @bind-Visible="showLogoutDialog" Width="300px">
+    <DialogContent>
+        <center>
+            <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Size="Size.Large" Style="width:100px; height:100px; margin:20px" />
+            <h3>@Globales.Usuario.Nombre</h3>
+        </center>
+        <div>¿Estás seguro de que quieres cerrar la sesión?</div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LogoutConfirmed">Sí</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LogoutCancelled">No</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private bool showLogoutDialog = false;
+
+    private void ShowLogoutDialog()
+    {
+        showLogoutDialog = true;
+    }
+
+    private void LogoutConfirmed()
+    {
+        // Aquí  la lógica para cerrar la sesión
+        _navigationManager.NavigateTo("/");
+    }
+
+    private void LogoutCancelled()
+    {
+        MudDialog.Close();
+    }
+}

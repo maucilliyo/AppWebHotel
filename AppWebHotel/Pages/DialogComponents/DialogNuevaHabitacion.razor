@@ -1,5 +1,85 @@
-﻿<h3>DialogNuevaHabitacion</h3>
+﻿
+@using AppWebHotel.Services
+@using AppWebHotel.Views.DialogMessage
+@using WebAppHotel.Models
+
+@inject IDialogService DialogService
+@inject TipoHabitacionService _tipoHabitacionService
+@inject HabitacionService _habitacionService
+
+<MudDialog Width="400px">
+    <DialogContent>
+        <h2>Nueva Habitación</h2>
+        <MudTextField @bind-Value="habitacion.NumeroHabitacion" Label="Número de Habitación" />
+        <MudTextField @bind-Value="habitacion.NumeroPiso" Label="Número de Piso" />
+ 
+        <MudSelect Margin="Margin.Dense"  @bind-Value="@selectedTipoHabitacion" Label="Tipo de Habitación" Variant="Variant.Outlined">
+            @foreach (var tipo in tipoHabitacion)
+            {
+                <MudSelectItem T="TipoHabitacion" Value="@tipo">@tipo.Tipo</MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="@CrearHabitacion">Crear</MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Outlined" OnClick="@Cancelar">Cancelar</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private Habitacion habitacion = new Habitacion();
+    private TipoHabitacion selectedTipoHabitacion;
+    private List<TipoHabitacion> tipoHabitacion  = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await   _tipoHabitacionService.GetListaAsync();
+
+        tipoHabitacion = result.ToList();
+    }
+    // Método para cerrar el diálogo
+    private async Task Cancelar()
+    {
+        // Aquí implementar la lógica para cancelar la reserva
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    // Método para crear una nueva habitación
+    private async Task CrearHabitacion()
+    {
+        //validaciones
+        var result = await _habitacionService.GetHabitaciones();
+        // Verificar si la habitación con el mismo número y piso ya existe en la lista
+        bool existeHabitacion = result.Any(h => h.NumeroHabitacion == habitacion.NumeroHabitacion && h.NumeroPiso == habitacion.NumeroPiso);
+
+        if (existeHabitacion)
+        {
+            // La habitación ya existe
+            var p = new DialogParameters { { "Message", $"La habitación #{habitacion.NumeroHabitacion} en el piso {habitacion.NumeroPiso} ya existe." } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+            return;
+        }
+
+        if (habitacion.NumeroHabitacion == 0 || habitacion.NumeroPiso==0)
+        {
+            // La habitación ya existe
+            var p = new DialogParameters { { "Message", $"El numero de habitacion o el numero de piso pueden ser 0." } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+            return;
+        }
+        if (selectedTipoHabitacion == null)
+        {
+            var p = new DialogParameters { { "Message", $"Debe selecionar un tipo de habitacion." } };
+            DialogService.Show<MensajeDialogPage>("Aviso", p);
+            return;
+        }
+        //
+        habitacion.TipoHabitacion = selectedTipoHabitacion.Tipo;
+        habitacion.IdTipoHabitacion = selectedTipoHabitacion.IDTipoHabitacion;
+
+        var response = _habitacionService.CrearNuevaHabitacion(habitacion);
+
+        await Cancelar();
+    }
 }

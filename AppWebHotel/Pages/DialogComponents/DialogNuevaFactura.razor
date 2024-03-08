@@ -29,7 +29,7 @@
 
                 <MudDivider Style="margin-top:10px; margin-bottom:20px" Vertical="true" FlexItem="true" />
 
-                <MudTextField Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Detalle" @bind-Value="_factura.Detalle" Required="true" />
+                <MudTextField Lines="3" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Detalle" @bind-Value="_factura.Detalle" Required="true" />
                 <MudTextField Format="N2" Style="width:150px" Margin="Margin.Dense" Label="Precio Total" @bind-Value="_factura.PrecioTotal" Required="true" />
 
                 <MudDivider Style="margin-top:20px; margin-bottom:20px" Vertical="true" FlexItem="true" />
@@ -61,7 +61,8 @@
     {
         int CantidaDias = reserva.FechaSalida.Subtract(reserva.FechaEntrada).Days;
         _factura.PrecioTotal = CantidaDias * 25000;
-        _factura.Detalle = "Cancelación de estadía por la cantidad en días de " + CantidaDias + " a ¢25.000 por día";
+        _factura.Detalle = "Cancelación de estadía en habitacion: "+ reserva.Habitacion.NumeroHabitacion +
+                           " piso: "+ reserva.Habitacion.NumeroPiso +", por la cantidad en días de " + CantidaDias + " a ¢25.000 por día";
     }
 
     private async void Facturar()

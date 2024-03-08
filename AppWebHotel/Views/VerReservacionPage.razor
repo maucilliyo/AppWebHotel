@@ -122,9 +122,10 @@
             //Generar el cobro
             Factura factura = new()
                 {
-                    CantidadPersonas = 0,
+                    CantidadPersonas = 1,
                     CodigoReserva = reserva.CodigoReserva,
-                    Detalle = "Cobro por cancelacion muy anticipada a la fecha de entrada",
+                    Detalle = "Cobro por cancelacion muy anticipada a la fecha de entrada, habitacion: "+reserva.Habitacion.NumeroHabitacion+
+                              ", piso: " + reserva.Habitacion.NumeroPiso,
                     FechaFactura = DateTime.Now,
                     IdReserva = reserva.IdReserva,
                     PrecioTotal = 10000

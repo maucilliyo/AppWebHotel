@@ -1,6 +1,120 @@
 ﻿@page "/ventas"
-<h3>HistorialVentas</h3>
+
+@using System.Threading.Tasks
+@using WebAppHotel.Models
+@using WebAppHotel.Services
+@inject FacturaService FacturaService
+
+<h1>Reporte de Ventas por fechas</h1>
+
+
+<div class="inline-content">
+    <MudDatePicker Class="datePicker" Label="Fecha de inicio" @bind-Date="fechaInicio" />
+    <MudDatePicker Class="datePicker" Label="Fecha de final" @bind-Date="fechaFin" />
+
+    <MudButton OnClick="VerFacturas" Class="btn-buscar" Variant="Variant.Filled" Color="Color.Primary">Buscar</MudButton>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Código de Reserva</th>
+            <th>Cantidad de Personas</th>
+            <th>Precio Total</th>
+            <th>Fecha de Factura</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    @if (facturas != null)
+    {
+        <tbody>
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.CodigoReserva</td>
+                    <td>@factura.CantidadPersonas</td>
+                    <td>@factura.PrecioTotal.ToString("N2")</td>
+                    <td>@factura.FechaFactura</td>
+                    <td>@factura.Detalle</td>
+                </tr>
+            }
+            <tr>
+                <td style="font-size:25px;" colspan="2"><strong>Total Ventas:</strong></td>
+                <td style="font-size:25px;font-family:'Microsoft Sans Serif';color:red">@facturas.Sum(f => f.PrecioTotal).ToString("N2")</td>
+            </tr>
+        </tbody>
+    }
+</table>
+
+<style>
+    .inline-content {
+        display: inline-flex;
+        margin: 10px;
+        margin-left: 20px;
+        justify-content: space-between; /* Distribuye los elementos uniformemente a lo largo del contenedor */
+        align-items: center; /* Centra verticalmente los elementos dentro del contenedor */
+    }
+
+    .container {
+        display: block;
+        height: 35vw;
+    }
+
+    .container-card {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Ajusta el espacio entre las tarjetas */
+        overflow-y: auto;
+        max-height: calc(80vh - 200px); /* Ajusta el valor según sea necesario */
+    }
+
+    .datePicker {
+        width: 150px;
+        margin-left: 20px;
+    }
+
+    .btn-buscar {
+        margin-top: 10px;
+        margin-left: 30px;
+    }
+
+    .card {
+        width: 200px; /* Ancho de cada tarjeta */
+        border: 1px solid #ccc; /* Borde de la tarjeta */
+        border-radius: 5px; /* Radio de borde para redondear esquinas */
+        padding: 5px; /* Espacio interno de la tarjeta */
+        margin: 5px; /* Margen entre las tarjetas */
+    }
+</style>
 
 @code {
+    private List<Factura> facturas;
+    private DateTime? fechaInicio = DateTime.Now;
+    private DateTime? fechaFin = DateTime.Now;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await VerFacturas();
+    }
+    private async Task VerFacturas()
+    {
+        var result = await FacturaService.GetFacturasAsync();
+        // Filtrar las facturas por fecha de factura
+        // Obtener la fecha de inicio y fin sin la hora
+        var fechaInicioSinHora = fechaInicio?.Date;
+        var fechaFinSinHora = fechaFin?.Date;
+
+        // Filtrar las facturas por fecha de factura
+        var facturasFiltradas = result.Where(f => f.FechaFactura.Date >= fechaInicioSinHora && f.FechaFactura.Date <= fechaFinSinHora).ToList();
+
+        if (facturasFiltradas.Count() > 0)
+        {
+            facturas = facturasFiltradas.ToList();
+        }
+        else
+        {
+            facturas = null;
+        }
+
+    }
 }
